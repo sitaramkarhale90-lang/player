@@ -6,60 +6,137 @@
   <title>Video Player</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    body { margin: 0; background: #0b0e14; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; padding: 15px; box-sizing: border-box; }
-    .box { width: 100%; max-width: 450px; background: #1a1f2c; padding: 25px 20px; border-radius: 14px; text-align: center; }
-    h2 { margin: 0 0 10px; font-size: 20px; }
-    p { color: #8e99a8; font-size: 14px; margin-bottom: 20px; }
-    .btn { background: #0088cc; color: #fff; border: none; padding: 14px 20px; font-size: 16px; font-weight: bold; border-radius: 30px; cursor: pointer; width: 100%; }
-    #timer { font-size: 15px; color: #4da3ff; margin-top: 15px; font-weight: bold; display: none; }
-    video { width: 100%; max-width: 450px; border-radius: 10px; display: none; }
+    body {
+      margin: 0;
+      background: #0f141c;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: #1e2638;
+      padding: 24px 20px;
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+    h2 { margin: 0 0 8px; font-size: 20px; }
+    p { color: #9aa7b9; font-size: 14px; margin-bottom: 20px; }
+    .btn {
+      background: #0088cc;
+      color: #fff;
+      border: none;
+      padding: 14px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 30px;
+      cursor: pointer;
+      width: 100%;
+      display: block;
+    }
+    .btn-success {
+      background: #28a745;
+    }
+    #timerText {
+      font-size: 15px;
+      color: #4da3ff;
+      margin-top: 14px;
+      font-weight: bold;
+      display: none;
+    }
+    #videoContainer {
+      width: 100%;
+      max-width: 480px;
+      display: none;
+    }
+    video {
+      width: 100%;
+      border-radius: 12px;
+      outline: none;
+      background: #000;
+    }
   </style>
 </head>
 <body>
 
-<div class="box" id="card">
-  <h2>Watch Full Video</h2>
-  <p>वीडियो देखने के लिए नीचे बटन पर क्लिक करके अनलॉक करें।</p>
-  <button id="unlockBtn" class="btn" onclick="startProcess()">▶ Unlock & Watch Video</button>
-  <div id="timer"></div>
-</div>
+  <!-- अनलॉक कार्ड -->
+  <div class="card" id="adCard">
+    <h2>Watch Full Video</h2>
+    <p>वीडियो देखने के लिए नीचे बटन पर क्लिक करके अनलॉक करें।</p>
+    
+    <button id="stepBtn" class="btn" onclick="handleClick()">▶ Unlock & Watch Video</button>
+    <div id="timerText"></div>
+  </div>
 
-<video id="videoScreen" controls playsinline controlslist="nodownload">
-  <source id="videoSrc" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
-  Browser does not support video.
-</video>
+  <!-- वीडियो प्लेयर सेक्शन -->
+  <div id="videoContainer">
+    <video id="player" controls playsinline webkit-playsinline>
+      <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4">
+      आपका डिवाइस वीडियो सपोर्ट नहीं करता।
+    </video>
+  </div>
 
-<script>
-  window.Telegram.WebApp.ready();
-  window.Telegram.WebApp.expand();
+  <script>
+    // टेलीग्राम वेब ऐप एक्सपैंड
+    if (window.Telegram && window.Telegram.WebApp) {
+      window.Telegram.WebApp.ready();
+      window.Telegram.WebApp.expand();
+    }
 
-  const AD_LINK = "https://www.google.com"; // बाद में यहाँ Adsterra का लिंक डालेंगे
+    const AD_URL = "https://www.google.com"; // बाद में यहाँ अपना Adsterra Direct Link डालें
+    let stage = 1;
 
-  function startProcess() {
-    window.Telegram.WebApp.openLink(AD_LINK);
+    function handleClick() {
+      const btn = document.getElementById("stepBtn");
+      const timer = document.getElementById("timerText");
+      const card = document.getElementById("adCard");
+      const container = document.getElementById("videoContainer");
+      const video = document.getElementById("player");
 
-    const btn = document.getElementById("unlockBtn");
-    const timerDiv = document.getElementById("timer");
-    btn.style.display = "none";
-    timerDiv.style.display = "block";
+      if (stage === 1) {
+        // 1. ऐड लिंक नए टैब में खोलें
+        if (window.Telegram && window.Telegram.WebApp) {
+          window.Telegram.WebApp.openLink(AD_URL);
+        } else {
+          window.open(AD_URL, '_blank');
+        }
 
-    let sec = 5;
-    timerDiv.innerText = "वीडियो अनलॉक हो रहा है... " + sec + "s";
+        // 2. टाइमर शुरू करें
+        btn.style.display = "none";
+        timer.style.display = "block";
+        let count = 5;
+        timer.innerText = "वीडियो अनलॉक हो रहा है... " + count + "s";
 
-    let interval = setInterval(() => {
-      sec--;
-      if (sec > 0) {
-        timerDiv.innerText = "वीडियो अनलॉक हो रहा है... " + sec + "s";
-      } else {
-        clearInterval(interval);
-        document.getElementById("card").style.display = "none";
-        const video = document.getElementById("videoScreen");
-        video.style.display = "block";
+        let countdown = setInterval(() => {
+          count--;
+          if (count > 0) {
+            timer.innerText = "वीडियो अनलॉक हो रहा है... " + count + "s";
+          } else {
+            clearInterval(countdown);
+            timer.style.display = "none";
+            btn.style.display = "block";
+            btn.className = "btn btn-success";
+            btn.innerText = "▶ Play Video Now";
+            stage = 2; // दूसरे स्टेज के लिए तैयार
+          }
+        }, 1000);
+
+      } else if (stage === 2) {
+        // 3. यूजर के टच पर वीडियो तुरंत चलेगा (ब्राउज़र ब्लॉक नहीं करेगा)
+        card.style.display = "none";
+        container.style.display = "block";
         video.play();
       }
-    }, 1000);
-  }
-</script>
+    }
+  </script>
 
 </body>
 </html>
