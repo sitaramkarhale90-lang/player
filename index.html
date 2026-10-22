@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Player</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body { margin: 0; background: #0b0e14; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; padding: 15px; box-sizing: border-box; }
+    .box { width: 100%; max-width: 450px; background: #1a1f2c; padding: 25px 20px; border-radius: 14px; text-align: center; }
+    h2 { margin: 0 0 10px; font-size: 20px; }
+    p { color: #8e99a8; font-size: 14px; margin-bottom: 20px; }
+    .btn { background: #0088cc; color: #fff; border: none; padding: 14px 20px; font-size: 16px; font-weight: bold; border-radius: 30px; cursor: pointer; width: 100%; }
+    #timer { font-size: 15px; color: #4da3ff; margin-top: 15px; font-weight: bold; display: none; }
+    video { width: 100%; max-width: 450px; border-radius: 10px; display: none; }
+  </style>
+</head>
+<body>
+
+<div class="box" id="card">
+  <h2>Watch Full Video</h2>
+  <p>वीडियो देखने के लिए नीचे बटन पर क्लिक करके अनलॉक करें।</p>
+  <button id="unlockBtn" class="btn" onclick="startProcess()">▶ Unlock & Watch Video</button>
+  <div id="timer"></div>
+</div>
+
+<video id="videoScreen" controls playsinline controlslist="nodownload">
+  <source id="videoSrc" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+  Browser does not support video.
+</video>
+
+<script>
+  window.Telegram.WebApp.ready();
+  window.Telegram.WebApp.expand();
+
+  const AD_LINK = "https://www.google.com"; // बाद में यहाँ Adsterra का लिंक डालेंगे
+
+  function startProcess() {
+    window.Telegram.WebApp.openLink(AD_LINK);
+
+    const btn = document.getElementById("unlockBtn");
+    const timerDiv = document.getElementById("timer");
+    btn.style.display = "none";
+    timerDiv.style.display = "block";
+
+    let sec = 5;
+    timerDiv.innerText = "वीडियो अनलॉक हो रहा है... " + sec + "s";
+
+    let interval = setInterval(() => {
+      sec--;
+      if (sec > 0) {
+        timerDiv.innerText = "वीडियो अनलॉक हो रहा है... " + sec + "s";
+      } else {
+        clearInterval(interval);
+        document.getElementById("card").style.display = "none";
+        const video = document.getElementById("videoScreen");
+        video.style.display = "block";
+        video.play();
+      }
+    }, 1000);
+  }
+</script>
+
+</body>
+</html>
